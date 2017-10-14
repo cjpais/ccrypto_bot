@@ -1,65 +1,159 @@
-import keys
-
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, InlineQueryHandler, Job
 import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-
+from telegram import InlineQueryResultArticle, ParseMode, \
+    InputTextMessageContent
 import urllib2
+import os
+import keys
+import random
+import matplotlib.pyplot as plt
+from matplotlib.finance import candlestick2_ochl
 import json
+import matplotlib.ticker as ticker
+import datetime as datetime
+from pytz import timezone
+import pytz
 
-def start(bot, update):
-    bot.send_message(chat_id=update.message.chat_id,
-                     text="""
-Welcome to ccrypto bot!\n\n
-Use /p {coin name or symbol}") to get the current\n
-price
-                          """
-                    )
+import logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-# def help(bot, update):
-#     bot.send_message(chat_id=update.message.chat_id,
-#                      text="Something to help")
+def get_coin_list():
+    response = urllib2.urlopen('https://www.cryptocompare.com/api/data/coinlist/')
+    coin_list = json.load(response)['Data']
 
-# def coins(bot, update):
-    # list the coins from coinmarketcap... in a non overwhelming way
+    coin_dict = {}
+
+    for sym, coin in coin_list.iteritems():
+        coin_dict[coin['Name'].strip().lower()] = sym
+        coin_dict[coin['CoinName'].strip().lower()] = sym
+
+    return coin_dict
 
 def price(bot, update):
-    coin = update.message.text[3:]
+    # TODO catch error and tell user they fucked up
+    coin = coin_list[update.message.text[3:].lower()]
 
-    name, usd, btc, hour, day = get_price(coin)
+    usd, btc, day = get_price(coin)
 
     bot.send_message(chat_id=update.message.chat_id,
                      text="""
 {}:
-USD: {}
+USD: <b>{}</b>
 BTC: {}
-1h: {}%
 24h: {}%
-                          """.format(name, usd, btc, hour, day))
+                          """.format(coin, usd, btc, day),
+                     parse_mode=telegram.ParseMode.HTML)
 
+def cap(bot,update):
+    coin = coin_list[update.message.text[5:].lower()]
+
+    response = urllib2.urlopen('https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms=BTC,USD'.format(coin))
+    cap = json.load(response)['DISPLAY'][coin]['USD']['MKTCAP']
+
+    bot.send_message(chat_id=update.message.chat_id,
+                     text="Market Cap ({})\n<b>{}</b>".format(coin, cap),
+                     parse_mode=telegram.ParseMode.HTML)
+
+# huhlol this doesnt even need to be a method, it was originally to clean it up
+# but this is fine
 def get_price(coin):
-    response = urllib2.urlopen('https://api.coinmarketcap.com/v1/ticker/')
+    response = urllib2.urlopen('https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms=BTC,USD'.format(coin))
+
     price_data = json.load(response)
+    usd_price_data = price_data['DISPLAY'][coin]['USD']
+    btc_price_data = price_data['RAW'][coin]['BTC']
 
-    coin = coin.lower()
+    return usd_price_data['PRICE'].replace(' ',''), \
+           btc_price_data['PRICE'], \
+           usd_price_data['CHANGEPCT24HOUR']
 
-    for data in price_data:
-        if data['name'].lower() == coin or \
-           data['id'].lower() == coin or \
-           data['symbol'].lower() == coin:
-            return data['name'], \
-                   data['price_usd'], \
-                   data['price_btc'], \
-                   data['percent_change_1h'], \
-                   data['percent_change_24h']
+def three_chart(bot,update):
+    coin = coin_list[update.message.text[4:].lower()]
 
-u = Updater(keys.bot_key)
+    response = urllib2.urlopen('https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym=USD&limit=72&aggregate=3&e=CCCAGG'.format(coin))
+    data = json.load(response)['Data']
 
-dp = u.dispatcher
+    chart = gen_chart(data, coin, 6)
 
-dp.add_handler(CommandHandler('start', start))
-# dp.add_handler(CommandHandler(['help', 'h'], help))
-# dp.add_handler(CommandHandler(['coins', 'c'], coins))
-dp.add_handler(CommandHandler(['price', 'p'], price))
+    bot.send_photo(chat_id=update.message.chat_id,
+                   photo=open('tmp.png'))
 
-u.start_polling()
-u.idle()
+def sixty_chart(bot,update):
+    coin = coin_list[update.message.text[5:].lower()]
+    response = urllib2.urlopen('https://min-api.cryptocompare.com/data/histoday?fsym={}&tsym=USD&limit=60&aggregate=3&e=CCCAGG'.format(coin))
+    data = json.load(response)['Data']
+    chart = gen_chart(data, coin, 10)
+
+    bot.send_photo(chat_id=update.message.chat_id,
+                   photo=open('tmp.png'))
+
+def day_chart(bot,update):
+    coin = coin_list[update.message.text[3:].lower()]
+    response = urllib2.urlopen('https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym=USD&limit=24&aggregate=3&e=CCCAGG'.format(coin))
+    data = json.load(response)['Data']
+    chart = gen_chart(data, coin, 12)
+
+    bot.send_photo(chat_id=update.message.chat_id,
+                   photo=open('tmp.png'))
+
+def gen_chart(data, coin, numdisp):
+    close = [d['close'] for d in data]
+    opens = [d['open'] for d in data]
+    high = [d['high'] for d in data]
+    low = [d['low'] for d in data]
+    dates = [d['time'] for d in data]
+
+    fig, ax = plt.subplots()
+
+    fig.patch.set_facecolor('#2f3d45')
+
+    ax.set_facecolor('#2f3d45')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    
+    ax.spines['top'].set_alpha(0)
+    ax.spines['right'].set_alpha(0)
+    ax.spines['bottom'].set_color('w')
+    ax.spines['left'].set_color('w')
+
+    plt.ylabel('Price of {} in USD'.format(coin))
+
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+
+    def mydate(x,pos):
+        try:
+            return xdate[int(x)]
+        except IndexError:
+            print "error"
+            return ''
+
+    candlestick2_ochl(ax, opens, close, high, low, width=.7, colordown='#f22800', colorup='#00ce03', alpha=.75)
+
+    xdate = [datetime.datetime.fromtimestamp(d, tz=pytz.utc).astimezone(timezone('US/Pacific')).strftime("%d/%m/%y %I:%M%p GMT") for d in dates]
+
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(numdisp))
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(mydate))
+    fig.autofmt_xdate()
+    fig.tight_layout()
+
+    fig.savefig('tmp.png', facecolor='#2f3d45')
+
+updater = Updater(keys.bot_key)
+
+jobs = {}
+coin_list = get_coin_list()
+print "built coin list"
+
+jq = updater.job_queue
+dp = updater.dispatcher
+
+# Crypto Handlers
+dp.add_handler(CommandHandler('p', price))
+dp.add_handler(CommandHandler('cap', cap))
+dp.add_handler(CommandHandler('c', day_chart))
+dp.add_handler(CommandHandler('c3', three_chart))
+dp.add_handler(CommandHandler('c60', sixty_chart))
+
+updater.start_polling()
+updater.idle()
