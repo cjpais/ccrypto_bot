@@ -7,6 +7,7 @@ import os
 import keys
 import random
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.finance import candlestick2_ochl
 import json
@@ -140,7 +141,6 @@ def gen_chart(data, coin, numdisp):
 
     fig.savefig('tmp.png', facecolor='#2f3d45')
 
-matplotlib.use('Agg')
 updater = Updater(keys.bot_key)
 
 jobs = {}
