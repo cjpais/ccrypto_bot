@@ -139,6 +139,7 @@ def gen_chart(data, coin, numdisp):
 
     fig.savefig('tmp.png', facecolor='#2f3d45')
 
+matplotlib.use('Agg')
 updater = Updater(keys.bot_key)
 
 jobs = {}
