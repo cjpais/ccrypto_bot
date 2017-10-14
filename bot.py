@@ -6,6 +6,7 @@ import urllib2
 import os
 import keys
 import random
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.finance import candlestick2_ochl
 import json
