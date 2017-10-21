@@ -99,13 +99,15 @@ def day_chart(bot,update):
 
 def tracker_callback(bot, job):
     now_resp = urllib2.urlopen('https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms=BTC,USD'.format(job.context["coin"]))
-    now_data = json.load(response)['RAW'][job.context['coin']]['USD']
+    now_data = json.load(now_resp)['RAW'][job.context['coin']]['USD']
     now_price = now_data['PRICE'] 
     now_time = now_data['LASTUPDATE'] 
 
     hour_time = now_time - 3600
-    hour_resp = urllib2.urlopen('https://min-api.cryptocompare.com/data/pricehistorical?fsyms={}&tsyms=BTC,USD&ts={}'.format(job.context["coin"], hour_time))
-    hour_price = json.load(response)[job.context['coin']]['USD']
+    hour_resp = urllib2.urlopen('https://min-api.cryptocompare.com/data/pricehistorical?fsym={}&tsyms=BTC,USD&ts={}'.format(job.context["coin"], hour_time))
+    hour_price = json.load(hour_resp)[job.context['coin']]['USD']
+    #hour_price = json.load(hour_resp)
+    print hour_price
 
     percent = (now_price - hour_price) / hour_price
     print "percent {}, coin {}".format(percent, job.context['coin'])
@@ -129,8 +131,9 @@ def track(bot, update):
                          text="Now tracking {}".format(coin))
     
 def track_response(bot, update, coin, percent):
-    
-    pass
+    print "track response called for coin {} with 1hr change of {}%".format(coin, percent) 
+    bot.send_message(chat_id=update.message.chat_id,
+                     text="{} Has gone up {} in the last 1hr".format(coin,percent))
 
 def gen_chart(data, coin, numdisp):
     close = [d['close'] for d in data]
