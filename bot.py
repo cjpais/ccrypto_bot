@@ -34,7 +34,6 @@ def get_coin_list():
 def price(bot, update):
     # TODO catch error and tell user they fucked up
     coin = coin_list[update.message.text[3:].lower()]
-
     usd, btc, day = get_price(coin)
 
     bot.send_message(chat_id=update.message.chat_id,
@@ -98,6 +97,41 @@ def day_chart(bot,update):
     bot.send_photo(chat_id=update.message.chat_id,
                    photo=open('tmp.png'))
 
+def tracker_callback(bot, job):
+    now_resp = urllib2.urlopen('https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms=BTC,USD'.format(job.context["coin"]))
+    now_data = json.load(response)['RAW'][job.context['coin']]['USD']
+    now_price = now_data['PRICE'] 
+    now_time = now_data['LASTUPDATE'] 
+
+    hour_time = now_time - 3600
+    hour_resp = urllib2.urlopen('https://min-api.cryptocompare.com/data/pricehistorical?fsyms={}&tsyms=BTC,USD&ts={}'.format(job.context["coin"], hour_time))
+    hour_price = json.load(response)[job.context['coin']]['USD']
+
+    percent = (now_price - hour_price) / hour_price
+    print "percent {}, coin {}".format(percent, job.context['coin'])
+     
+    if percent < .05 and percent > -.05:
+        jobs[job.context["coin"]] = jq.run_once(tracker_callback, 300, job.context)
+    elif (percent > .05 and percent < .1) or (percent < -.05 and percent > -.1): 
+        jobs[job.context["coin"]] = jq.run_once(tracker_callback, 7200, job.context)
+        track_response(bot, job.context["update"], job.context["coin"], percent)
+    elif percent > .1 or percent < -.1:
+        jobs[job.context["coin"]] = jq.run_once(tracker_callback, 7200, job.context)
+        track_response(bot, job.context["update"], job.context["coin"], percent)
+
+def track(bot, update): 
+    coin = coin_list[update.message.text[3:].lower()]
+    try:
+        job = jobs[coin]
+    except KeyError:
+        jobs[coin] = jq.run_once(tracker_callback, 0, context={"coin": coin, "update": update}) 
+        bot.send_message(chat_id=update.message.chat_id,
+                         text="Now tracking {}".format(coin))
+    
+def track_response(bot, update, coin, percent):
+    
+    pass
+
 def gen_chart(data, coin, numdisp):
     close = [d['close'] for d in data]
     opens = [d['open'] for d in data]
@@ -156,6 +190,7 @@ dp.add_handler(CommandHandler('cap', cap))
 dp.add_handler(CommandHandler('c', day_chart))
 dp.add_handler(CommandHandler('c3', three_chart))
 dp.add_handler(CommandHandler('c60', sixty_chart))
+dp.add_handler(CommandHandler('t', track))
 
 updater.start_polling()
 updater.idle()
