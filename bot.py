@@ -109,17 +109,18 @@ def tracker_callback(bot, job):
     #hour_price = json.load(hour_resp)
     print hour_price
 
-    percent = (now_price - hour_price) / hour_price
+    difference = now_price - hour_price
+    percent = difference / hour_price
     print "percent {}, coin {}".format(percent, job.context['coin'])
      
     if percent < .05 and percent > -.05:
         jobs[job.context["coin"]] = jq.run_once(tracker_callback, 300, job.context)
     elif (percent > .05 and percent < .1) or (percent < -.05 and percent > -.1): 
         jobs[job.context["coin"]] = jq.run_once(tracker_callback, 7200, job.context)
-        track_response(bot, job.context["update"], job.context["coin"], percent)
+        track_response(bot, job.context["update"], job.context["coin"], percent, difference)
     elif percent > .1 or percent < -.1:
         jobs[job.context["coin"]] = jq.run_once(tracker_callback, 7200, job.context)
-        track_response(bot, job.context["update"], job.context["coin"], percent)
+        track_response(bot, job.context["update"], job.context["coin"], percent, difference)
 
 def track(bot, update): 
     coin = coin_list[update.message.text[3:].lower()]
@@ -130,10 +131,14 @@ def track(bot, update):
         bot.send_message(chat_id=update.message.chat_id,
                          text="Now tracking {}".format(coin))
     
-def track_response(bot, update, coin, percent):
+def track_response(bot, update, coin, percent, difference):
     print "track response called for coin {} with 1hr change of {}%".format(coin, percent) 
+    response = "up"
+    if percent < 0:
+        response = "down"
+    
     bot.send_message(chat_id=update.message.chat_id,
-                     text="{} Has gone up {} in the last 1hr".format(coin,percent))
+                    text="{} Has gone {} {:.2%} (${:.2}) in the last 1hr".format(coin,response,percent, difference))
 
 def gen_chart(data, coin, numdisp):
     close = [d['close'] for d in data]
