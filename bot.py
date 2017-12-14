@@ -51,12 +51,13 @@ def price(bot, update):
 
     bot.send_message(chat_id=update.message.chat_id,
                      text="""
-{}:
-USD: {}
+{} ({}):
+USD: <b>{}</b>
 BTC: {}
 1h: {}%
 24h: {}%
-                          """.format(name, usd, btc, hour, day))
+                          """.format(name, symbol, usd, btc, hour, day),
+                          parse_mode=telegram.ParseMode.HTML)
 
 def get_price(coin):
     response = urllib2.urlopen('https://api.coinmarketcap.com/v1/ticker/')
@@ -69,6 +70,7 @@ def get_price(coin):
            data['id'].lower() == coin or \
            data['symbol'].lower() == coin:
             return data['name'], \
+                   data['symbol'], \
                    data['price_usd'], \
                    data['price_btc'], \
                    data['percent_change_1h'], \
