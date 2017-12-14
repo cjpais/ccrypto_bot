@@ -31,19 +31,35 @@ def get_coin_list():
 
     return coin_dict
 
-def price(bot, update):
-    # TODO catch error and tell user they fucked up
-    coin = coin_list[update.message.text[3:].lower()]
-    usd, btc, day = get_price(coin)
+# def price(bot, update):
+#     # TODO catch error and tell user they fucked up
+#     coin = coin_list[update.message.text[3:].lower()]
+#     usd, btc, day = get_price(coin)
 
-    bot.send_message(chat_id=update.message.chat_id,
-                     text="""
-{}:
-USD: <b>{}</b>
-BTC: {}
-24h: {}%
-                          """.format(coin, usd, btc, day),
-                     parse_mode=telegram.ParseMode.HTML)
+#     bot.send_message(chat_id=update.message.chat_id,
+#                      text="""
+# {}:
+# USD: <b>{}</b>
+# BTC: {}
+# 24h: {}%
+#                           """.format(coin, usd, btc, day),
+#                      parse_mode=telegram.ParseMode.HTML)
+
+def get_price(coin):
+    response = urllib2.urlopen('https://api.coinmarketcap.com/v1/ticker/')
+    price_data = json.load(response)
+
+    coin = coin.lower()
+
+    for data in price_data:
+        if data['name'].lower() == coin or \
+           data['id'].lower() == coin or \
+           data['symbol'].lower() == coin:
+            return data['name'], \
+                   data['price_usd'], \
+                   data['price_btc'], \
+                   data['percent_change_1h'], \
+                   data['percent_change_24h']
 
 def cap(bot,update):
     coin = coin_list[update.message.text[5:].lower()]
