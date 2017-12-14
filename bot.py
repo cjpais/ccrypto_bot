@@ -50,10 +50,10 @@ def price(bot, update):
     name, symbol, usd, btc, hour, day = get_price(coin)
 
     bot.send_message(chat_id=update.message.chat_id,
-                     text="""
+                     text=u"""
 {} ({}):
-USD: <b>{}</b>
-BTC: {}
+USD: <b>${}</b>
+BTC: \U0243{}
 1h: {}%
 24h: {}%
                           """.format(name, symbol, usd, btc, hour, day),
