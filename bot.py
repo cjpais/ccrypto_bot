@@ -47,7 +47,7 @@ def get_coin_list():
 def price(bot, update):
     coin = update.message.text[3:]
 
-    name, usd, btc, hour, day = get_price(coin)
+    name, symbol, usd, btc, hour, day = get_price(coin)
 
     bot.send_message(chat_id=update.message.chat_id,
                      text="""
