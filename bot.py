@@ -69,12 +69,12 @@ def get_price(coin):
         if data['name'].lower() == coin or \
            data['id'].lower() == coin or \
            data['symbol'].lower() == coin:
-            return data['name'], \
-                   data['symbol'], \
-                   data['price_usd'], \
-                   data['price_btc'], \
-                   data['percent_change_1h'], \
-                   data['percent_change_24h']
+            return unicode(data['name']), \
+                   unicode(data['symbol']), \
+                   unicode(data['price_usd']), \
+                   unicode(data['price_btc']), \
+                   unicode(data['percent_change_1h']), \
+                   unicode(data['percent_change_24h'])
 
 def cap(bot,update):
     coin = coin_list[update.message.text[5:].lower()]
