@@ -50,10 +50,10 @@ def price(bot, update):
     name, symbol, usd, btc, hour, day = get_price(coin)
 
     bot.send_message(chat_id=update.message.chat_id,
-                     text=u"""
+                     text="""
 {} ({}):
 USD: <b>${}</b>
-BTC: \U0243{}
+BTC: {}
 1h: {}%
 24h: {}%
                           """.format(name, symbol, usd, btc, hour, day),
@@ -69,12 +69,12 @@ def get_price(coin):
         if data['name'].lower() == coin or \
            data['id'].lower() == coin or \
            data['symbol'].lower() == coin:
-            return unicode(data['name']), \
-                   unicode(data['symbol']), \
-                   unicode(data['price_usd']), \
-                   unicode(data['price_btc']), \
-                   unicode(data['percent_change_1h']), \
-                   unicode(data['percent_change_24h'])
+            return data['name'], \
+                   data['symbol'], \
+                   data['price_usd'], \
+                   data['price_btc'], \
+                   data['percent_change_1h'], \
+                   data['percent_change_24h']
 
 def cap(bot,update):
     coin = coin_list[update.message.text[5:].lower()]
