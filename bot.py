@@ -48,16 +48,20 @@ def price(bot, update):
     coin = update.message.text[3:]
 
     name, symbol, usd, btc, hour, day = get_price(coin)
+    # TODO MAKE THIS BETTER
+    btc = round(float(btc),6)
 
-    bot.send_message(chat_id=update.message.chat_id,
-                     text="""
-{} ({}):
+    prices = u"""
+{} (<b>{}</b>):
 USD: <b>${}</b>
-BTC: {}
+BTC: \u0243{}
 1h: {}%
 24h: {}%
-                          """.format(name, symbol, usd, btc, hour, day),
-                          parse_mode=telegram.ParseMode.HTML)
+                          """.format(name, symbol, usd, btc, hour, day)
+
+    bot.send_message(chat_id=update.message.chat_id,
+                     text=prices,
+                     parse_mode=telegram.ParseMode.HTML)
 
 def get_price(coin):
     response = urllib2.urlopen('https://api.coinmarketcap.com/v1/ticker/')
@@ -88,16 +92,16 @@ def cap(bot,update):
 
 # huhlol this doesnt even need to be a method, it was originally to clean it up
 # but this is fine
-# def get_price(coin):
-#     response = urllib2.urlopen('https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms=BTC,USD'.format(coin))
+def get_price(coin):
+    response = urllib2.urlopen('https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms=BTC,USD'.format(coin))
 
-#     price_data = json.load(response)
-#     usd_price_data = price_data['DISPLAY'][coin]['USD']
-#     btc_price_data = price_data['RAW'][coin]['BTC']
+    price_data = json.load(response)
+    usd_price_data = price_data['DISPLAY'][coin]['USD']
+    btc_price_data = price_data['RAW'][coin]['BTC']
 
-#     return usd_price_data['PRICE'].replace(' ',''), \
-#            btc_price_data['PRICE'], \
-#            usd_price_data['CHANGEPCT24HOUR']
+    return usd_price_data['PRICE'].replace(' ',''), \
+           btc_price_data['PRICE'], \
+           usd_price_data['CHANGEPCT24HOUR']
 
 def three_chart(bot,update):
     coin = coin_list[update.message.text[4:].lower()]
@@ -172,6 +176,9 @@ def track_response(bot, update, coin, percent, difference):
                     text="{} Has gone {} {:.2%} (${:.2}) in the last 1hr".format(coin,response,percent, difference))
 
 def gen_chart(data, coin, numdisp):
+    """ 
+        A helper function to generate a chart from the data returned from 
+    """
     close = [d['close'] for d in data]
     opens = [d['open'] for d in data]
     high = [d['high'] for d in data]
@@ -226,10 +233,10 @@ dp = updater.dispatcher
 # Crypto Handlers
 dp.add_handler(CommandHandler('p', price))
 dp.add_handler(CommandHandler('cap', cap))
-dp.add_handler(CommandHandler('c', day_chart))
-dp.add_handler(CommandHandler('c3', three_chart))
-dp.add_handler(CommandHandler('c60', sixty_chart))
-dp.add_handler(CommandHandler('t', track))
+# dp.add_handler(CommandHandler('c', day_chart))
+# dp.add_handler(CommandHandler('c3', three_chart))
+# dp.add_handler(CommandHandler('c60', sixty_chart))
+# dp.add_handler(CommandHandler('t', track))
 
 updater.start_polling()
 updater.idle()
