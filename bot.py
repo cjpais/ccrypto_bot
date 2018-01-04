@@ -54,9 +54,9 @@ def cap(bot,update):
     coin = update.message.text[5:].lower()
     cap = "{} Market Cap <b>${:,}</b>"
 
-    if coin == 'market' or coin == 'all':
+    if coin == 'market' or coin == 'all' or coin == "total":
         response = json.load(urllib2.urlopen(cmc_cap_url))
-        message = cap.format('Total', response['total_market_cap_usd'])
+        message = cap.format('Total', int(float(response['total_market_cap_usd'])))
     else:
         response = urllib2.urlopen(cmc_coin_url)
         data = json.load(response)
@@ -64,7 +64,7 @@ def cap(bot,update):
             if d['name'].lower() == coin or \
                d['id'].lower() == coin or \
                d['symbol'].lower() == coin:
-                message = cap.format(d['symbol'], float(d['market_cap_usd']))
+                message = cap.format(d['symbol'], int(float(d['market_cap_usd'])))
                 break
 
     bot.send_message(chat_id=update.message.chat_id,
@@ -74,7 +74,7 @@ def cap(bot,update):
 def index(bot, update):
     response = json.load(urllib2.urlopen(cmc_10_url))
     message = "<b>Top 10 Coins:</b>"
-    line = "\n<b>{}. {}</b> ${} ({})"
+    line = "\n<b>{}. {}</b> ${}"
 
     for index, data in enumerate(response):
         message += line.format(index+1, data['symbol'], data['price_usd'])
