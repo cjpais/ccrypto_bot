@@ -16,6 +16,15 @@ cmc_coin_url = 'https://api.coinmarketcap.com/v1/ticker/?limit=300/'
 cmc_10_url = 'https://api.coinmarketcap.com/v1/ticker/?limit=10'
 cmc_cap_url = 'https://api.coinmarketcap.com/v1/global/'
 
+def help(bot, update):
+    helptext = """
+/p <coin> - Get Price of coin
+/i - Get the top 10 coins, display price and percentage of total market cap
+/cap <coin> - Get the market cap of a coin or use 'all' to get total market cap
+                """
+    bot.send_message(chat_id=update.message.chat_id,
+                     text=helptext)
+
 def price(bot, update):
     coin = update.message.text[3:]
     name, symbol, usd, btc, hour, day = get_price(coin)
@@ -71,13 +80,16 @@ def cap(bot,update):
                      text=message,
                      parse_mode=telegram.ParseMode.HTML)
 
+
 def index(bot, update):
+    total = json.load(urllib2.urlopen(cmc_cap_url))['total_market_cap_usd']
     response = json.load(urllib2.urlopen(cmc_10_url))
     message = "<b>Top 10 Coins:</b>"
-    line = "\n<b>{}. {}</b> ${}"
+    line = "\n<b>{}. {}</b> ${} ({}%)"
 
     for index, data in enumerate(response):
-        message += line.format(index+1, data['symbol'], data['price_usd'])
+        dom = round(float(data['market_cap_usd'])/total*100, 2)
+        message += line.format(index+1, data['symbol'], data['price_usd'], dom)
 
     bot.send_message(chat_id=update.message.chat_id,
                      text=message,
@@ -90,6 +102,7 @@ updater = Updater(keys.bot_key)
 dp = updater.dispatcher
 
 # Crypto Handlers
+dp.add_handler(CommandHandler(['h', 'help'], help))
 dp.add_handler(CommandHandler('p', price))
 dp.add_handler(CommandHandler('cap', cap))
 dp.add_handler(CommandHandler(['i','index'], index))
