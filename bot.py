@@ -131,7 +131,7 @@ def index(bot, update):
 
     for index, data in enumerate(response):
         dom = round(float(data['market_cap_usd'])/total*100, 2)
-        price = "${}".format(data['price_usd'])
+        price = "${}".format(round(float(data['price_usd']), 3))
         message += line.format(index+1, data['symbol'], price, data['percent_change_24h'])
 
     bot.send_message(chat_id=update.message.chat_id,

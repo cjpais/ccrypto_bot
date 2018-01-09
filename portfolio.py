@@ -114,9 +114,9 @@ def list_portfolio(bot, update):
             total_value += amount_val
             total_change += dollar_change
 
-            message += "\n{} {}: ${:,} (${:,})".format(coin.amount, coin.symbol, amount_val, dollar_change)
-        message += "\n\n$ Change over 24h: ${:,}".format(total_change)
-        message += "\nTotal Value: <b>${:,}</b>".format(total_value)
+            message += "\n{} {}: ${:,} (${:,})".format(coin.amount, coin.symbol, round(amount_val,2), round(dollar_change,2))
+        message += "\n\n$ Change over 24h: ${:,}".format(round(total_change,2))
+        message += "\nTotal Value: <b>${:,}</b>".format(round(total_value,2))
     bot.send_message(chat_id=update.message.chat_id,
                      text=message,
                      parse_mode=ParseMode.HTML)
