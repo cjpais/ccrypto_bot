@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, exists, and_
 from sqlalchemy.orm import sessionmaker
 import re
 from telegram import ParseMode
+import logging
 
 import config
 from db_manager import Base, User, Coin
@@ -13,6 +14,7 @@ session = Session()
 
 def portfolio_message_handler(bot, update):
     # Check if user exists in db
+    logging.log(logging.INFO, update.message.from_user)
     t_id = update.message.from_user.id
     first_name = update.message.from_user.first_name 
     last_name = update.message.from_user.last_name
