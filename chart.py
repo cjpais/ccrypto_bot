@@ -37,12 +37,12 @@ def chart_handler(bot, update):
     if len(update.message.text.split(" ")) < 3:
         bot.send_message(chat_id=update.message.chat_id,
                          text="""
-To use charts do /c <coin> <candle time>
+/c <coin> <candle time> - Get the chart of a coin and specify the candlestick time
 Example: /c eth 15m will make a chart with eth where the candlestick duration is 15minutes.
 
 Time Options:
-Right now there are a fixed set of time options:
-1m, 5m, 15m, 1hr, 3hr, 12hr, 1dy, 3dy, 7dy
+Right now there are a fixed set of candlestick size options, with time periods shown in parenthesis:
+1m (2h), 5m (10h), 15m (32h), 1hr (5d), 3hr (2wk), 12hr (2m), 1dy (4m), 3dy (9m), 7dy (1y)
 """)
         return
 

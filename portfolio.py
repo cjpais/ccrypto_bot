@@ -14,7 +14,6 @@ session = Session()
 
 def portfolio_message_handler(bot, update):
     # Check if user exists in db
-    logging.log(logging.INFO, update.message.from_user)
     t_id = update.message.from_user.id
     first_name = update.message.from_user.first_name 
     last_name = update.message.from_user.last_name
@@ -35,11 +34,13 @@ def portfolio_message_handler(bot, update):
 
 def get_message(input, user):
     # We do this so that we can not accidentally add
-    if input[0] == "add" or input[0] == "bought":
+    if input[0].lower() == "add" or input[0].lower() == "bought":
         # determine if input[1] is <number> or <number><coin>
         message = add_coin(user, input)
-    elif input[0] == "sold" or input[0] == "remove":
+    elif input[0].lower() == "sold" or input[0].lower() == "remove":
         message = remove_coin(user, input)
+    else:
+        return None
     return message
 
 def add_coin(user, input):
@@ -55,7 +56,7 @@ def add_coin(user, input):
         coin = Coin(symbol=sym, amount=num, user=user)
         session.add(coin)
         session.commit()
-    return "{} added".format(sym)
+    return "{} {} added".format(num, sym)
 
 def remove_coin(user, input):
     num, sym = get_num_coins(input)
@@ -72,7 +73,7 @@ def remove_coin(user, input):
             return "You have sold {} of your {}. {} {} remaining".format(num, sym, coin.amount, sym)
     else:
         # dont remove someting thats not there
-        return "You have no {} to remove you fuck".format(sym)
+        return "You have no {} to remove you big dumb baby".format(sym)
 
 
 def get_num_coins(input):
@@ -90,9 +91,9 @@ def get_num_coins(input):
     return num, coin
 
 def list_portfolio(bot, update):
-    t_id = update.message.chat.id
-    first_name = update.message.chat.first_name 
-    last_name = update.message.chat.last_name
+    t_id = update.message.from_user.id
+    first_name = update.message.from_user.first_name 
+    last_name = update.message.from_user.last_name
 
     user = get_user(t_id, first_name, last_name)
     print user

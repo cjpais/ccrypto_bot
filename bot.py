@@ -38,13 +38,15 @@ def help(bot, update):
 /p <coin> - Get Price of coin
 /i - Get the top 10 coins, display price and percentage of total market cap
 /cap <coin> - Get the market cap of a coin or use 'all' to get total market cap
+/pf - List your crypto portfolio. To add to portfolio try 'add <num> <coin>', similarly to remove 'remove <num> <coin>'
+/dom - Get top 10 coins and respective share of the market 
 
 /c <coin> <candle time> - Get the chart of a coin and specify the candlestick time
 Example: /c eth 15m will make a chart with eth where the candlestick duration is 15minutes.
 
 Time Options:
-Right now there are a fixed set of time options:
-1m, 5m, 15m, 1hr, 3hr, 12hr, 1dy, 3dy, 7dy
+Right now there are a fixed set of candlestick size options, with time periods shown in parenthesis:
+1m (2h), 5m (10h), 15m (32h), 1hr (5d), 3hr (2wk), 12hr (2m), 1dy (4m), 3dy (9m), 7dy (1y)
                 """
     bot.send_message(chat_id=update.message.chat_id,
                      text=helptext)
@@ -58,7 +60,7 @@ def get_coin_data(symbol):
         return None
 
 def price(bot, update):
-    symbol = update.message.text[3:].upper()
+    symbol = update.message.text[3:].split(' ')[0].upper()
 
     data = get_coin_data(symbol)
     if data is None:
@@ -100,21 +102,37 @@ def cap(bot,update):
                      parse_mode=telegram.ParseMode.HTML)
 
 
+def dom(bot, update):
+    total = json.load(urllib2.urlopen(cmc_cap_url))['total_market_cap_usd']
+    response = json.load(urllib2.urlopen(cmc_10_url))
+    message = "<b>Top 10 Coins:</b>\n"
+    message += "<b>{:<7}{:<13}{:<18}</b>".format("Rank", \
+                                                                 "Symbol", \
+                                                                 "% Cap")
+    line = "\n<b>{:>4}{:>13}</b>{:>14}%"
+
+    for index, data in enumerate(response):
+        dom = round(float(data['market_cap_usd'])/total*100, 2)
+        message += line.format(index+1, data['symbol'], dom)
+
+    bot.send_message(chat_id=update.message.chat_id,
+                     text=message,
+                     parse_mode=telegram.ParseMode.HTML)
+
 def index(bot, update):
     total = json.load(urllib2.urlopen(cmc_cap_url))['total_market_cap_usd']
     response = json.load(urllib2.urlopen(cmc_10_url))
     message = "<b>Top 10 Coins:</b>\n"
-    message += "<b>{:<7}{:<13}{:<18}{:<13}{}</b>".format("Rank", \
+    message += "<b>{:<7}{:<13}{:<18}{:<13}</b>".format("Rank", \
                                                                  "Symbol", \
                                                                  "Price", \
-                                                                 "24h", \
-                                                                 "% Cap")
-    line = "\n<b>{:>4}{:>13}</b>{:>14}{:>12}%{:>12}%"
+                                                                 "24h")
+    line = "\n<b>{:>4}{:>13}</b>{:>14}{:>12}%"
 
     for index, data in enumerate(response):
         dom = round(float(data['market_cap_usd'])/total*100, 2)
         price = "${}".format(data['price_usd'])
-        message += line.format(index+1, data['symbol'], price, data['percent_change_24h'], dom)
+        message += line.format(index+1, data['symbol'], price, data['percent_change_24h'])
 
     bot.send_message(chat_id=update.message.chat_id,
                      text=message,
@@ -136,6 +154,8 @@ def get_coin_list():
 
     return coin_dict
 
+# TODO get top 10 shitcoins
+
 updater = Updater(keys.bot_key)
 
 # jq = updater.job_queue
@@ -149,6 +169,7 @@ dp.add_handler(CommandHandler(['h', 'help'], help))
 dp.add_handler(CommandHandler('p', price))
 dp.add_handler(CommandHandler('cap', cap))
 dp.add_handler(CommandHandler(['i','index'], index))
+dp.add_handler(CommandHandler('dom', dom))
 dp.add_handler(CommandHandler('c', chart.chart_handler))
 dp.add_handler(CommandHandler(['git', 'github'], github))
 dp.add_handler(CommandHandler('pf', list_portfolio))
