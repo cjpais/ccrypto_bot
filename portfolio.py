@@ -13,9 +13,9 @@ session = Session()
 
 def portfolio_message_handler(bot, update):
     # Check if user exists in db
-    t_id = update.message.chat.id
-    first_name = update.message.chat.first_name 
-    last_name = update.message.chat.last_name
+    t_id = update.message.from_user.id
+    first_name = update.message.from_user.first_name 
+    last_name = update.message.from_user.last_name
 
     user = get_user(t_id, first_name, last_name)
 
