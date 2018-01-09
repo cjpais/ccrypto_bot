@@ -27,8 +27,11 @@ def price_updater():
     config.price_list = data
 
     # todo this could be an object but yolo
-    for coin_data in data:
-        config.price_dict[coin_data['symbol']] = coin_data
+    try:
+        for coin_data in data:
+            config.price_dict[coin_data['symbol']] = coin_data
+    except ValueError:
+        pass
     logging.log(logging.INFO, "loaded coins")
     threading.Timer(60, price_updater).start()
 
