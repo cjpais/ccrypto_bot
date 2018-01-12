@@ -47,6 +47,7 @@ def help(bot, update):
     update.message.reply_text(helptext)
 
 def request(bot, update):
+    # not sure how this is going to be done yet
     pass
 
 def main():
@@ -78,6 +79,7 @@ def main():
     dp.add_handler(CommandHandler('r', restart, filters=Filters.user(username=['@cj_pais', '@hate2truck'])))
     dp.add_handler(CommandHandler(['w', 'wallet', 'pf', 'portfolio'], wallet.wallet))
     dp.add_handler(CommandHandler(['rq', 'request', 'f', 'feature'], request))
+    dp.add_handler(CommandHandler('bio', user.bio))
     dp.add_handler(MessageHandler(Filters.text, wallet.wallet_message_handler))
 
     dp.add_error_handler(error)
