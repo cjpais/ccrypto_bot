@@ -1,5 +1,11 @@
-# ccrypto_bot
+# CJ's Crypto Bot
 
-To run this bot a few things are necessary. First you need to get your own API key. To do this look into Telegrams BotFather. Once you have the key for your bot create a .py file called keys.py. In this file you should have something like `bot_key = "KEY GOES HERE"`. In bot.py we will import keys and use `keys.bot_key` to run the bot.
+CJ's Crypto Bot is a Telegram chat bot that will give users various bits of information about cryptocurrencies. This bot heavily relies on the API provided by coinmarketcap.com and from cryptocompare to generate candlestick charts. This is built off of Python 2.7.
 
-You also will need to install requirements.txt. This can be done through `pip install requirements.txt`. I don't remember the exact command off the top of my head so this could be wrong. This will install the necessary python libraries via pip.
+### Developing
+
+To run this bot a few things are necessary. First you need to get your own Telegram API key. To do this message Telegram's BotFather. Once you have the key for your bot create a .py file called keys.py. In this file you should have something like `bot_key = "KEY GOES HERE"`. This key is used to run your bot.
+
+You also will need to install requirements.txt. This can be done through `pip install -r requirements.txt`. This will install all of the required python libraries. You should now be able to run the bot with `python crypto_bot.py` and begin messaging it. See usage below for help with commands.
+
+### Usage
