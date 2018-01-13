@@ -56,7 +56,7 @@ Similarly to remove 5 eth do 'remove 5 eth'
 /r - Restart the bot. Only Owen and CJ have access (You need a username ;)
 """
     bot.send_message(chat_id=update.message.chat_id,
-                     text=message.reply_text(helptext))
+                     text=helptext)
 
 def request(bot, update):
     # not sure how this is going to be done yet
