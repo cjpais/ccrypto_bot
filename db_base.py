@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 import config
  
 engine = create_engine(config.docker_db)
+
 Session = sessionmaker(bind=engine)
 session = Session()
 

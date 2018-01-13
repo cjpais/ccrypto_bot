@@ -34,7 +34,6 @@ class User(Base):
         session.commit()
 
     def get_bio(self):
-        logging.log(logging.INFO, "test {}".format(self.bio))
         if not self.bio:
             return "{} has no bio".format(self.first_name)
         return self.bio
@@ -88,10 +87,10 @@ def bio(bot, update):
                 # get the requested user from their id
                 t_id = entity.user.id
                 user = session.query(User).filter(User.telegram_id==t_id).first()
-                update.message.reply_text=user.get_bio()
+                update.message.reply_text = user.get_bio()
             if entity.type == 'mention':
                 # query db with username instead message[1]
                 user = session.query(User).filter(User.username == message[1][1:]).first()
-                update.message.reply_text=user.get_bio()
+                update.message.reply_text = user.get_bio()
 
             

@@ -12,7 +12,6 @@ import datetime
 from db_base import Base, Session, engine, session
 import config
 
-# engine = create_engine(config.build_db)
 Base.metadata.bind = engine
 
 cmc_url = 'https://api.coinmarketcap.com/v1/ticker/?limit=1000'
@@ -21,7 +20,7 @@ cc_url = 'https://www.cryptocompare.com/api/data/coinlist/'
 cc_coin_dict = None 
 
 price_message = u"""
-{} (<b>{}</b>) at {:%I}:{:%M%p} PST
+{} (<b>{}</b>) at {:%I}:{:%M%p}
 USD: <b>${}</b>
 BTC: \u0243{}
 1h: {}%
@@ -93,6 +92,15 @@ class Coin(Base):
     def cap(self):
         return "{} Market Cap:\n<b>${:,}</b> ({:+}%)".format(self.symbol, self.marketcap, self.change_24h)
 
+    def dominance(self):
+        dom_arr = []
+        cap_all = json.load(urllib2.urlopen(cmc_cap_url))['total_market_cap_usd']
+        dom = "{}%".format(round(self.marketcap/cap_all*100, 2))
+        dom_arr.append(str(self.rank))
+        dom_arr.append(str(self.symbol))
+        dom_arr.append(dom)
+        return dom_arr
+
     def index(self):
         """ This will return index data as list of strings for pretty printing """
         index = []
@@ -109,7 +117,6 @@ def index(bot, update):
 
     # get top 10 coins
     top10 = session.query(Coin).order_by(Coin.rank.asc()).limit(10).all()
-    session.close()
     for coin in top10:
         message_list.append(coin.index())
 
@@ -144,8 +151,29 @@ def get_price(bot, update):
                      text=message,
                      parse_mode=ParseMode.HTML)
 
-def domination(bot, update):
-    pass
+def dominance(bot, update):
+    message = "<b>Top 10 Coins:</b>"
+    message_list = [["Rank", "Symbol", "Dominance"]]
+    message_builder = ""
+
+    # get top 10 coins
+    top10 = session.query(Coin).order_by(Coin.rank.asc()).limit(10).all()
+    for coin in top10:
+        message_list.append(coin.dominance())
+
+    max_len = [max(len(x) for x in line)+2 for line in zip(*message_list)]
+
+    for index, m in enumerate(message_list):
+        if index == 0:
+            message_builder += "\n<b>{:<6}{:<8}{:<18}</b>".format(m[0], m[1], m[2])
+        else:
+            message_builder += "\n{:<{}}{:<{}}{}".format(m[0], 2*max_len[0]-len(m[0])-1, m[1], 2*max_len[1]-len(m[1])-len(m[0])-1, m[2])
+
+    message += message_builder
+
+    bot.send_message(chat_id=update.message.chat_id,
+                     text=message,
+                     parse_mode=ParseMode.HTML)
 
 ################################################################################
 ########################### HELPER FUNCTIONS BELOW #############################
@@ -155,7 +183,6 @@ def get_coin_from_input(s):
     coin = session.query(Coin).filter((Coin.name.ilike(s)) | \
                                       (Coin.symbol.ilike(s)) | \
                                       (Coin.cmc_id.ilike(s))).first()
-    session.close()
     return coin
 
 def get_market_cap(bot, update):

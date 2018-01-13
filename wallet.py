@@ -10,7 +10,6 @@ from db_base import Base, Session, engine, session
 
 import logging
 
-# engine = create_engine(config.build_db)
 Base.metadata.bind = engine
 
 class Wallet(Base):
@@ -42,7 +41,7 @@ def wallet(bot, update):
     if len(wallets) == 0:
         message = "You have no coins in your portfolio"
     else:
-        message = "<b>{}'s Portfolio</b>".format(user.first_name)
+        message = u"<b>{}'s Portfolio</b>".format(user.first_name)
         total_value = 0
         total_change = 0
         for w in wallets:
@@ -52,20 +51,18 @@ def wallet(bot, update):
             total_value += amount_val
             total_change += dollar_change
 
-            message += "\n{} {}: ${:,} (${:,})".format(w.amount, w.coin.symbol, round(amount_val,2), round(dollar_change,2))
-        message += "\n\nUSD Change over 24h: ${:,}".format(round(total_change,2))
-        message += "\nTotal Value: <b>${:,}</b>".format(round(total_value,2))
+            message += u"\n{} {}: ${:,} ({:+}% \u2192 ${:+,})".format(w.amount, w.coin.symbol, round(amount_val,2), w.coin.change_24h, round(dollar_change,2))
+        message += u"\n\nUSD Change over 24h: ${:,}".format(round(total_change,2))
+        message += u"\nTotal Value: <b>${:,}</b>".format(round(total_value,2))
     bot.send_message(chat_id=update.message.chat_id,
                      text=message,
                      parse_mode=ParseMode.HTML)
 
 def wallet_message_handler(bot, update):
     message_list = update.message.text.split()
-    if message_list[0] not in ['add', 'bought', 'buy', 'sold', 'sell', 'remove', 'trade', 'traded', 'exchanged', 'exchange']:
-        return
-
-    # Check if user exists in db
     user = get_or_create_user(update.message.from_user)
+    if message_list[0].lower() not in ['add', 'bought', 'buy', 'sold', 'sell', 'remove', 'trade', 'traded', 'exchanged', 'exchange']:
+        return
 
     # This will take the message, convert it into an action and return the 
     # response from the action
@@ -111,7 +108,7 @@ def remove_coin(user, input):
                                           (Wallet.coin == coin)).first()
     if wallet:
         if num == "all":
-            return_string = "You have sold all of your {} {}".format(wallet.amount, coin.symbol)
+            return_string = "You have sold all of your {}".format(coin.symbol)
             wallet.amount = 0.0
             session.commit()
             return return_string
