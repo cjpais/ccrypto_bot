@@ -5,6 +5,7 @@ import traceback
 import logging
 import urllib2
 import json
+from pytz import timezone
 
 import datetime
 
@@ -20,7 +21,7 @@ cc_url = 'https://www.cryptocompare.com/api/data/coinlist/'
 cc_coin_dict = None 
 
 price_message = u"""
-{} (<b>{}</b>) at {:%I}:{:%M%p} UTC
+{} (<b>{}</b>) at {:%I}:{:%M%p} PST
 USD: <b>${}</b>
 BTC: \u0243{}
 1h: {}%
@@ -84,7 +85,10 @@ class Coin(Base):
         self.updated = datetime.datetime.utcnow()
 
     def price(self):
-        return price_message.format(self.name, self.symbol, self.updated, self.updated, self.price_usd, self.price_btc, self.change_1h, self.change_24h)
+        logging.log(logging.INFO, self.updated)
+        utc = self.updated.replace(tzinfo=timezone('UTC'))
+        pst = utc.astimezone(timezone('America/Los_Angeles'))
+        return price_message.format(self.name, self.symbol, pst, pst, self.price_usd, self.price_btc, self.change_1h, self.change_24h)
 
     def cap(self):
         return "{} Market Cap:\n<b>${:,}</b> ({:+}%)".format(self.symbol, self.marketcap, self.change_24h)

@@ -74,22 +74,16 @@ def bio(bot, update):
     if len(message) == 1:
         update.message.reply_text(bio_helptext)
         return
-
     if message[1].lower() == 'add':
-        # go get the user and then set their bio to what the following text is.
-        # Do this with a .join(' ') from the list
         user = get_or_create_user(update.message.from_user)
-        # TODO LIST COMPREHENSION EVERYWHERE
+
         bio = " ".join(message[2:])
         user.set_bio(bio)
         bot.send_message(chat_id=update.message.chat_id,
                          text="Added Bio")
-        return
     else:
         # the user has queried someone elses bio
-        logging.log(logging.INFO, update.message)
         for entity in update.message.parse_entities().iterkeys():
-            logging.log(logging.INFO, entity)
             if entity.user is not None:
                 # get the requested user from their id
                 t_id = entity.user.id
