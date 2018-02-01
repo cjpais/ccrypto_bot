@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 
 from db_base import Base, Session, engine, session
 import config
+import logging
 
 # engine = create_engine(config.build_db)
 Base.metadata.bind = engine
@@ -30,6 +31,7 @@ class User(Base):
 
     def set_bio(self, s):
         self.bio = s
+        session.commit()
 
     def get_bio(self):
         if not self.bio:
@@ -71,14 +73,24 @@ def bio(bot, update):
     if len(message) == 1:
         update.message.reply_text(bio_helptext)
         return
-
     if message[1].lower() == 'add':
-        # go get the user and then set their bio to what the following text is.
-        # Do this with a .join(' ') from the list
-        pass
+        user = get_or_create_user(update.message.from_user)
+
+        bio = " ".join(message[2:])
+        user.set_bio(bio)
+        bot.send_message(chat_id=update.message.chat_id,
+                         text="Added Bio")
     else:
         # the user has queried someone elses bio
         for entity in update.message.parse_entities().iterkeys():
             if entity.user is not None:
-                pass #TODO
+                # get the requested user from their id
+                t_id = entity.user.id
+                user = session.query(User).filter(User.telegram_id==t_id).first()
+                update.message.reply_text = user.get_bio()
+            if entity.type == 'mention':
+                # query db with username instead message[1]
+                user = session.query(User).filter(User.username == message[1][1:]).first()
+                update.message.reply_text = user.get_bio()
+
             
