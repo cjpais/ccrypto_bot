@@ -155,13 +155,17 @@ def get_coin_from_input(s):
     return coin
 
 def get_market_cap(bot, update):
-    coin_str = update.message.text.split()[1]
-    if coin_str.lower() == 'all' or coin_str.lower() == "total":
-        # get total market cap
+    try:
+        coin_str = update.message.text.split()[1]
+        if coin_str.lower() == 'all' or coin_str.lower() == "total":
+            # get total market cap
+            data = json.load(urllib2.urlopen(cmc_cap_url))
+            message = "Total Market Cap: <b>${:,}</b>".format(int(float(data['total_market_cap_usd'])))
+        else:
+            message = get_coin_from_input(coin_str).cap()
+    except IndexError:
         data = json.load(urllib2.urlopen(cmc_cap_url))
         message = "Total Market Cap: <b>${:,}</b>".format(int(float(data['total_market_cap_usd'])))
-    else:
-        message = get_coin_from_input(coin_str).cap()
 
     bot.send_message(chat_id=update.message.chat_id,
                      text=message,
