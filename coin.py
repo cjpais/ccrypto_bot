@@ -110,6 +110,9 @@ class Coin(Base):
         index.append("{:+}%".format(self.change_24h))
         return index
 
+    def volume(self):
+            return "{} 24h Volume:\n<b>${:,}</b>".format(self.symbol, self.volume_24h)
+
 def index(bot, update):
     message = "<b>Top 10 Coins:</b>"
     message_list = [["Rank", "Symbol", "Price", "24h"]]
@@ -198,6 +201,17 @@ def get_market_cap(bot, update):
         data = json.load(urllib2.urlopen(cmc_cap_url))
         message = "Total Market Cap: <b>${:,}</b>".format(int(float(data['total_market_cap_usd'])))
 
+    bot.send_message(chat_id=update.message.chat_id,
+                     text=message,
+                     parse_mode=ParseMode.HTML)
+
+def get_volume(bot, update):
+    try:
+        coin_str = update.message.text.split()[1]
+        message = get_coin_from_input(coin_str).volume()
+    except IndexError:
+        data = json.load(urllib2.urlopen(cmc_cap_url))
+        message = "Market 24h Volume: <b>${:,}</b>".format(int(float(data['total_24h_volume_usd'])))
     bot.send_message(chat_id=update.message.chat_id,
                      text=message,
                      parse_mode=ParseMode.HTML)

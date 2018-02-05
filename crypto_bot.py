@@ -84,6 +84,7 @@ def main():
     dp.add_handler(CommandHandler(['a', 'about'], about))
     dp.add_handler(CommandHandler(['p', 'price'], coin.get_price))
     dp.add_handler(CommandHandler(['cap'], coin.get_market_cap))
+    dp.add_handler(CommandHandler(['v'], coin.get_volume))
     dp.add_handler(CommandHandler(['i', 'index'], coin.index))
     dp.add_handler(CommandHandler(['d', 'dom', 'dominance'], coin.dominance))
     dp.add_handler(CommandHandler(['c', 'chart'], chart.chart_handler))
