@@ -115,7 +115,7 @@ class Coin(Base):
 
 def index(bot, update):
     message = "<b>Top 10 Coins:</b>"
-    message_list = [["Rank", "Symbol", "Price", "24h"]]
+    message_list = [["#", "Symbol", "Price", "24h"]]
     message_builder = ""
 
     # get top 10 coins
@@ -129,7 +129,10 @@ def index(bot, update):
         if index == 0:
             message_builder += "\n<b>{:<6}{:<8}{:<18}{:<}</b>".format(m[0], m[1], m[2], m[3])
         else:
-            message_builder += "\n{:<{}}{:<{}}{:<{}}{}".format(m[0], 2*max_len[0]-len(m[0])-1, m[1], 2*max_len[1]-len(m[1])-len(m[0])-1, m[2], 2*max_len[2]+max_len[1]-len(m[0])-len(m[1])-len(m[2])-3, m[3])
+            message_builder += "\n{:<{}}{:<{}}{:<{}}{}".format(m[0],
+                            2*max_len[0]-len(m[0])-1, m[1],
+                            2*max_len[1]-len(m[1])-len(m[0])-1, m[2],
+                            2*max_len[2]+max_len[1]-len(m[0])-len(m[1])-len(m[2])-4, m[3])
 
     message += message_builder
 

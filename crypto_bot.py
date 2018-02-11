@@ -9,10 +9,11 @@ from threading import Thread
 
 import keys 
 import coin
+from coin import Coin
 import wallet
 import chart
 import user
-from db_base import Base, engine
+from db_base import Base, engine, Session, session
 
 import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -65,6 +66,7 @@ def request(bot, update):
 def main():
     Base.metadata.create_all(engine)
 
+
     updater = Updater(keys.bot_key)
     dp = updater.dispatcher
 
@@ -77,6 +79,8 @@ def main():
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def restart(bot, update):
+        logging.log(logging.INFO, "Deleting Coins From DB")
+        session.query(Coin).delete()
         update.message.reply_text('Bot is restarting...')
         Thread(target=stop_and_restart).start()
 
