@@ -81,6 +81,7 @@ def main():
     def restart(bot, update):
         logging.log(logging.INFO, "Deleting Coins From DB")
         session.query(Coin).delete()
+        session.commit()
         update.message.reply_text('Bot is restarting...')
         Thread(target=stop_and_restart).start()
 
