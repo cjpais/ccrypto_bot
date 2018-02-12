@@ -121,8 +121,33 @@ def remove_coin(user, input):
         return "You have no {} to remove you big dumb baby".format(coin.symbol)
 
 def trade_coin(user, input):
-    # this takes the form of something like trade 10 eth to 100000 gnt
-    pass
+    message = "The trading format is 'trade 10 eth for 1000 gnt'"
+    if len(input) < 6:
+        return message
+    else:
+        from_num, from_str = get_num_coins(input[:3])
+        to_num, to_str = get_num_coins(input[3:])
+
+        from_coin = get_coin_from_input(from_str) 
+        to_coin = get_coin_from_input(to_str) 
+        
+        w_from_coin = session.query(Wallet).filter((Wallet.user == user) &\
+                                                   (Wallet.coin == from_coin)).first()
+        w_to_coin = session.query(Wallet).filter((Wallet.user == user) &\
+                                                 (Wallet.coin == to_coin)).first()
+
+        if w_from_coin:
+            w_from_coin.amount -= from_num
+            if w_to_coin:
+                w_to_coin.amount += from_num
+            else:
+                new_wallet = Wallet(user, to_coin, to_num)
+                session.add(new_wallet)
+            session.commit()
+            message = "You traded {} {} for {} {}".format(from_num, from_coin.symbol, to_num, to_coin.symbol)
+        else:
+            pass
+    return message
 
 def get_num_coins(input):
     if len(input) == 3:
