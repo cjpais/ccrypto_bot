@@ -246,7 +246,7 @@ def update_coins(bot, job):
         for d in data:
             # logging.log(logging.INFO, "working on {}".format(d['id']))
             # try to find by name
-            coin = session.query(Coin).filter(Coin.symbol == d['symbol']).first()
+            coin = session.query(Coin).filter(Coin.cmc_id == d['id']).first()
             if coin is not None:
                 coin.update(d)
             else:

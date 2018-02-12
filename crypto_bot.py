@@ -25,7 +25,8 @@ def error(bot, update, error):
 
 def about(bot, update):
     aboutext = """
-Created by CJ initially for just checking prices of different cryptocurrencies, but it has grown a little since then
+Created by CJ initially for just checking prices of different cryptocurrencies,
+but it has grown a little since then
 
 Donate to me:
 BTC: 15XkP2Xb2AATkWZnHurwJFeuGAkTFaeDPx
@@ -41,7 +42,7 @@ def help(bot, update):
     helptext = """
 /h - Display this help menu
 /p <coin> - Get the price of a coin with some additional data, time in PST
-/cap <coin> - Get the market cap of a coin. If you use 'all' or 'total' for coin it will return the Total Market Cap
+/cap <coin> - Get the market cap of a coin. If you use 'all' or 'total' for coin it will return the total market cap
 /i - Get the top 10 coins and display their price and 24hr percent change
 /d - Get the top 10 coins and their share of the overall market
 /c <coin> <time> - Build a chart for a coin. Use /c to get more help

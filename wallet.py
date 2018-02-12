@@ -109,7 +109,7 @@ def remove_coin(user, input):
     if wallet:
         if num == "all":
             return_string = "You have sold all of your {}".format(coin.symbol)
-            wallet.amount = 0.0
+            session.delete(wallet)
             session.commit()
             return return_string
         else:
@@ -137,10 +137,14 @@ def trade_coin(user, input):
                                                  (Wallet.coin == to_coin)).first()
 
         if w_from_coin:
-            w_from_coin.amount -= from_num
+            if w_from_coin.amount > from_num:
+                w_from_coin.amount -= from_num
+            else:
+                session.delete(w_from_coin)
             if w_to_coin:
                 w_to_coin.amount += to_num
             else:
+                print "adding {} {}".format(to_num, to_coin)
                 new_wallet = Wallet(user, to_coin, to_num)
                 session.add(new_wallet)
             session.commit()
