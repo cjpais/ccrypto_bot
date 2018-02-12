@@ -79,6 +79,10 @@ def main():
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     def restart(bot, update):
+        update.message.reply_text('Bot is restarting...')
+        Thread(target=stop_and_restart).start()
+    
+    def refresh(bot, update):
         logging.log(logging.INFO, "Deleting Coins From DB")
         session.query(Coin).delete()
         session.commit()
@@ -95,6 +99,7 @@ def main():
     dp.add_handler(CommandHandler(['c', 'chart'], chart.chart_handler))
     dp.add_handler(CallbackQueryHandler(chart.handle_button))
     dp.add_handler(CommandHandler('r', restart, filters=Filters.user(username=['@cj_pais', '@hate2truck'])))
+    dp.add_handler(CommandHandler('refresh', restart, filters=Filters.user(username=['@cj_pais'])))
     dp.add_handler(CommandHandler(['w', 'wallet', 'pf', 'portfolio'], wallet.wallet))
     dp.add_handler(CommandHandler(['rq', 'request', 'f', 'feature'], request))
     dp.add_handler(CommandHandler('bio', user.bio))
