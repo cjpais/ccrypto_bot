@@ -139,7 +139,7 @@ def trade_coin(user, input):
         if w_from_coin:
             w_from_coin.amount -= from_num
             if w_to_coin:
-                w_to_coin.amount += from_num
+                w_to_coin.amount += to_num
             else:
                 new_wallet = Wallet(user, to_coin, to_num)
                 session.add(new_wallet)
