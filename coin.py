@@ -149,7 +149,7 @@ def get_price(bot, update):
     coin = get_coin_from_input(coin_str)
 
     if coin is None:
-        message = "Couldn't find the coin {}".format(coin_str)
+        message = "CJ SUCKS".format(coin_str)
     else:
         message = coin.price()
 
