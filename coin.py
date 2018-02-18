@@ -150,6 +150,10 @@ def get_price(bot, update):
 
     if coin is None:
         message = "CJ SUCKS".format(coin_str)
+    if coin_str in ['prl', 'xrb']:
+        bot.send_message(chat_id=update.message.chat_id,
+                         text="Nice shill coin Ryan",
+                         parse_mode=ParseMode.HTML)
     else:
         message = coin.price()
 
