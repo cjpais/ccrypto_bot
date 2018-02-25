@@ -45,13 +45,16 @@ def wallet(bot, update):
         total_value = 0
         total_change = 0
         for w in wallets:
-            amount_val = w.coin.price_usd*w.amount
-            dollar_change = amount_val*(w.coin.change_24h/100)
+	    try:
+                amount_val = w.coin.price_usd*w.amount
+                dollar_change = amount_val*(w.coin.change_24h/100)
 
-            total_value += amount_val
-            total_change += dollar_change
+                total_value += amount_val
+                total_change += dollar_change
 
-            message += u"\n{} {}: ${:,} ({:+}% \u2192 ${:+,})".format(w.amount, w.coin.symbol, round(amount_val,2), w.coin.change_24h, round(dollar_change,2))
+                message += u"\n{} {}: ${:,} ({:+}% \u2192 ${:+,})".format(w.amount, w.coin.symbol, round(amount_val,2), w.coin.change_24h, round(dollar_change,2))
+            except:
+                pass 
         message += u"\n\nUSD Change over 24h: ${:,}".format(round(total_change,2))
         message += u"\nTotal Value: <b>${:,}</b>".format(round(total_value,2))
     bot.send_message(chat_id=update.message.chat_id,
