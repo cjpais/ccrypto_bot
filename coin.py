@@ -85,6 +85,7 @@ class Coin(Base):
 
     def price(self):
         logging.log(logging.INFO, self.updated)
+        logging.log(logging.INFO, "price")
         utc = self.updated.replace(tzinfo=timezone('UTC'))
         pst = utc.astimezone(timezone('America/Los_Angeles'))
         return price_message.format(self.name, self.symbol, pst, pst, self.price_usd, self.price_btc, self.change_1h, self.change_24h)
